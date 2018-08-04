@@ -74,7 +74,7 @@ const DEFAULT_LABEL = "untitled";
 export default class extends React.Component {
   // NOTE(Kagami): This component is _not_ pure.
   state = {tabs: [], tabIndex: 0};
-  componentWillMount() {
+  UNSAFE_componentWillMount() {
     this.addTab();
   }
   componentDidMount() {
@@ -139,14 +139,18 @@ export default class extends React.Component {
     const {tabs} = this.state;
     tabs[i].progress = progress;
     let totalActiveTabs = 0;
-    const progressSum = tabs.reduce((acc, curr) => {
-      if (!curr.progress) return acc;
-      totalActiveTabs++;
-      return acc + curr.progress;
+    const progressSum = tabs.reduce((acc, cur) => {
+      if (cur.progress > 0 && cur.progress < 100) {
+        totalActiveTabs++;
+        return acc + cur.progress;
+      } else {
+        return acc;
+      }
     }, 0);
-    const meanProgress = progressSum / totalActiveTabs || 0;
-    remote.getCurrentWindow().setProgressBar(meanProgress / 100);
-    if (meanProgress === 100) {
+    if (progressSum > 0) {
+      const meanProgress = progressSum / totalActiveTabs;
+      remote.getCurrentWindow().setProgressBar(meanProgress / 100);
+    } else {
       remote.getCurrentWindow().setProgressBar(-1);
     }
     this.setState({tabs});
@@ -209,14 +213,14 @@ export default class extends React.Component {
             name="copy"
             title="Clone tab"
             className={classes.icon}
-            onTouchTap={this.handleClone.bind(null, i)}
+            onClick={this.handleClone.bind(null, i)}
           />
         </ShowHide>
         <Icon
           name="close"
           title="Close tab"
           className={classes.icon}
-          onTouchTap={this.handleClose.bind(null, i)}
+          onClick={this.handleClose.bind(null, i)}
         />
       </div>
     );
@@ -228,7 +232,7 @@ export default class extends React.Component {
         name="plus"
         title="New tab"
         className={classes.iconNew}
-        onTouchTap={this.handleNew}
+        onClick={this.handleNew}
       />
     );
   }

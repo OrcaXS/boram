@@ -7,13 +7,12 @@ import {mkInputMenu, defaultIsEditable} from "electron-input-menu";
 import context from "electron-contextmenu-middleware";
 import React from "react";
 import ReactDOM from "react-dom";
-import injectTapEventPlugin from "react-tap-event-plugin";
 import {useSheet} from "../jss";
 import {MuiThemeProvider, BACKGROUND_COLOR} from "../theme";
 import MainTabs from "../main-tabs";
-import "file!./roboto-light.ttf";
-import "file!./roboto-regular.ttf";
-import "file!./roboto-medium.ttf";
+import "./roboto-light.ttf";
+import "./roboto-regular.ttf";
+import "./roboto-medium.ttf";
 
 @useSheet({"@global": {
   body: {
@@ -85,8 +84,5 @@ const inputMenu = mkInputMenu(function(node) {
 });
 context.use(inputMenu);
 context.activate();
-
-// Required for material-ui.
-injectTapEventPlugin();
 
 ReactDOM.render(<Index/>, document.querySelector(".boram-index"));

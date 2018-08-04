@@ -24,7 +24,7 @@ import {parseTime, showTime, parseAR, tryRun} from "../util";
 })
 export default class extends React.PureComponent {
   state = {pause: true, time: 0, volume: 100, mute: false, fullscreen: false};
-  componentWillMount() {
+  UNSAFE_componentWillMount() {
     this.setTime(this.state.time);
   }
   componentDidMount() {
@@ -328,7 +328,7 @@ class CropArea extends React.PureComponent {
     window.addEventListener("mouseup", this.handleGlobalMouseUp, false);
     this.setRects();
   }
-  componentWillReceiveProps(nextProps) {
+  UNSAFE_componentWillReceiveProps(nextProps) {
     const acrop = this.props.crop;
     const bcrop = nextProps.crop;
     if (!acrop) return;
@@ -793,13 +793,13 @@ class Volume extends React.PureComponent {
     super(props);
     // We need to create new sheet per component because we edit them at
     // runtime and multiple components will intersect with each other.
-    const sliderSheet = jss.createStyleSheet(
+    const sheet2 = jss.createStyleSheet(
       {slider: {"&::-webkit-slider-runnable-track": {}}},
-      {link: true, meta: Math.random().toString()}
+      {link: true}
     ).attach();
-    this.sliderClass2 = sliderSheet.classes.slider;
-    const className = `${this.sliderClass2}::-webkit-slider-runnable-track`;
-    this.progressRule = sliderSheet.addRule("", {background: ""}, {className});
+    this.sliderClass2 = sheet2.classes.slider;
+    const trackSel = `.${this.sliderClass2}::-webkit-slider-runnable-track`;
+    this.progressRule = sheet2.getRule(trackSel);
   }
   state = {shown: false};
   isDragging() {
@@ -963,13 +963,13 @@ class Time extends React.PureComponent {
 class Seek extends React.PureComponent {
   constructor(props) {
     super(props);
-    const sliderSheet = jss.createStyleSheet(
+    const sheet2 = jss.createStyleSheet(
       {slider: {"&::-webkit-slider-runnable-track": {}}},
-      {link: true, meta: Math.random().toString()}
+      {link: true}
     ).attach();
-    this.sliderClass2 = sliderSheet.classes.slider;
-    const className = `${this.sliderClass2}::-webkit-slider-runnable-track`;
-    this.progressRule = sliderSheet.addRule("", {background: ""}, {className});
+    this.sliderClass2 = sheet2.classes.slider;
+    const trackSel = `.${this.sliderClass2}::-webkit-slider-runnable-track`;
+    this.progressRule = sheet2.getRule(trackSel);
   }
   handleKey = (e) => {
     e.preventDefault();

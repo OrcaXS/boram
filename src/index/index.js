@@ -6,14 +6,14 @@
 import fs from "fs";
 import url from "url";
 import {BrowserWindow, app, dialog} from "electron";
-import {name, version} from "json!../../package.json";
+import {name, version} from "../../package.json";
 import {APP_PATH, ICON_BIG_PATH, WIN_ICON_PATH, PAGE_PATH} from "../shared";
 import {getPluginPath} from "./plugin";
-import "file!./package.json";
-import "file!./index.html";
-import "file!./icon-big.png";
+import "file-loader?name=package.json!./package.json.electron";
+import "./index.html";
+import "./icon-big.png";
 if (BORAM_WIN_BUILD) {
-  require("file!./icon.ico");
+  require("./icon.ico");
 }
 
 const toRemoveNames = [];
@@ -22,7 +22,17 @@ global.removeOnQuit = function(name) {
 };
 
 if (BORAM_DEBUG) {
-  require("electron-debug")({enabled: true});
+  // Don't use electron-debug because of
+  // https://github.com/sindresorhus/electron-debug/issues/61
+  const localShortcut = require("electron-localshortcut");
+  localShortcut.register("F12", () => {
+    const win = BrowserWindow.getFocusedWindow();
+    win.webContents.toggleDevTools();
+  });
+  localShortcut.register("CmdOrCtrl+R", () => {
+    const win = BrowserWindow.getFocusedWindow();
+    win.webContents.reloadIgnoringCache();
+  });
 }
 // Plugin init would fail if activated, sort of debug option.
 if (process.env.BORAM_NO_HWACCEL) {
@@ -56,15 +66,15 @@ if (process.env.BORAM_NO_HWACCEL) {
 })();
 
 function runtimeChecks() {
-  if (BORAM_WIN_BUILD) {
+  if (BORAM_WIN_BUILD && !BORAM_X64_BUILD) {
     const arch = require("arch")();
-    if (!BORAM_X64_BUILD && arch !== "x86") {
-      // Strictly not an error but x64 build will be faster.
-      dialog.showErrorBox(
-        "Wrong build",
-        "You're trying to run x86 build on x64 system."
-      );
-      return app.exit(1);
+    if (arch === "x64") {
+      dialog.showMessageBox({
+        type: "warning",
+        title: "Wrong build",
+        message: "You're running x86 build on x64 system. " +
+                 "Consider using x64 build for better performance.",
+      });
     }
   }
   if (BORAM_LIN_BUILD) {
@@ -90,7 +100,7 @@ app.on("ready", () => {
     // Works strangely on Linux. useContentSize=false enlarges window to
     // include borders and useContentSize=true enlarges even more.
     useContentSize: BORAM_WIN_BUILD || BORAM_MAC_BUILD,
-    title: `${name} v${version} by t-ara.industries`,
+    title: `${name} v${version} by T-ara Industries`,
     icon: BORAM_WIN_BUILD ? WIN_ICON_PATH : ICON_BIG_PATH,
     webPreferences: {
       plugins: true,

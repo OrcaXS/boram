@@ -287,9 +287,12 @@ class BoramInstance : public pp::Instance {
     if (!mpv_)
       DIE("context init failed");
 
+    char* terminal = getenv("BORAM_TERMINAL");
+    if (terminal && strlen(terminal))
+      mpv_set_option_string(mpv_, "terminal", "yes");
     char* verbose = getenv("BORAM_VERBOSE");
     if (verbose && strlen(verbose))
-      mpv_set_option_string(mpv_, "terminal", "yes");
+      mpv_set_option_string(mpv_, "msg-level", "all=v");
 
     // Can't be set after initialize in mpv 0.18.
     mpv_set_option_string(mpv_, "input-default-bindings", "yes");
@@ -310,7 +313,6 @@ class BoramInstance : public pp::Instance {
     if (mpv_set_option_string(mpv_, "vo", "opengl-cb") < 0)
       DIE("failed to set VO");
 
-    mpv_set_option_string(mpv_, "vf-defaults", "yadif=interlaced-only=no");
     mpv_set_option_string(mpv_, "stop-playback-on-init-failure", "no");
     mpv_set_option_string(mpv_, "audio-file-auto", "no");
     mpv_set_option_string(mpv_, "sub-auto", "no");
