@@ -2,84 +2,126 @@ image: Visual Studio 2013
 platform: x64
 
 environment:
-  nodejs_version: "10"  
+  nodejs_version: "8"  
 
 cache:
   - node_modules
   - '%USERPROFILE%\.electron'
-  - _build
   - 'C:\nacl_sdk'
+  - '_build\nacl_sdk'
 
 init:
   # - git config --global core.autocrlf input
   # - ps: iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))
 
 install:
-  - ps: Install-Product node 10 x64
+  - ps: Install-Product node 8 x64
   - mkdir "_build\mpv"
   - mkdir "_build\ffmpeg"
-  - mkdir "_build\nacl_sdk"
-  - mkdir "bin\win64"
+  - ps: | 
+          $path = "_build\nacl_sdk"
+          If(!(test-path $path))
+          {
+              New-Item -ItemType Directory -Force -Path $path
+          }
+  
+  - mkdir "bin\win64\bin-video"
+  
   - cd "_build"
-  
   - echo Installing NaCl_SDK...
-  
-  - curl -L -fsS -o nacl_sdk.zip https://storage.googleapis.com/nativeclient-mirror/nacl/nacl_sdk/nacl_sdk.zip
-  - 7z x nacl_sdk.zip -o"C:\"
-  - cd C:\nacl_sdk
-  - ./naclsdk update
-  - ps: (Get-Content pepper_49\tools\host_vc.mk).Replace("32_host","64_host") | Set-Content pepper_49\tools\host_vc.mk
-  - call "C:\Program Files\Microsoft SDKs\Windows\v7.1\Bin\SetEnv.cmd" /x64
-  - call "C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\vcvarsall.bat" amd64
-  - set NACL_SDK_ROOT=c:\nacl_sdk\pepper_49
-  - cd pepper_49\src
-  - make TOOLCHAIN=win
+  - ps: |
+          If(!(test-path "C:\nacl_sdk"))
+          {
+                curl -L -fsS -o nacl_sdk.zip https://github.com/Kagami/nacl_sdk/archive/master.zip
+                7z x nacl_sdk.zip -o"C:\"
+                cd C:\
+                ren nacl_sdk-master nacl_sdk
+                cd C:\nacl_sdk
+                ./naclsdk update
+                (Get-Content pepper_49\tools\host_vc.mk).Replace("32_host","64_host") | Set-Content pepper_49\tools\host_vc.mk
+                call "C:\Program Files\Microsoft SDKs\Windows\v7.1\Bin\SetEnv.cmd" /x64
+                call "C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\vcvarsall.bat" amd64
+                set NACL_SDK_ROOT=c:\nacl_sdk\pepper_49
+                cd pepper_49\src
+                make TOOLCHAIN=win
+          }
 
-  # - echo Preparing binaries...
-  # - echo Downloading Latest ffmpeg executable...
-  # - cd "C:\projects\boram\_build"
-  # - curl -L -fsS -o ffmpeg\ffmpeg-latest.7z https://ffmpeg.zeranoe.com/builds/win64/static/ffmpeg-latest-win64-static.7z
-  # - 7z x ffmpeg\ffmpeg-latest.7z -o"ffmpeg"
-  # - copy C:\projects\boram\_build\ffmpeg\ffmpeg-latest\bin\ffmpeg.exe C:\projects\boram\bin\win64\
-  # - copy C:\projects\boram\_build\ffmpeg\ffmpeg-latest\bin\ffprob.exe C:\projects\boram\bin\win64\
-  # 
-  # - echo Downloading latest libmpv 64-bit build...
-  # - curl -L -fsS -o mpv\mpv-dev.7z https://mpv.srsfckn.biz/mpv-dev-latest.7z
-  # - 7z x mpv\mpv-dev.7z -oC:\mpv-dev
-  # 
+
+  - echo Preparing binaries...
+  - echo Downloading Latest ffmpeg executable...
+  - cd "C:\projects\boram\_build"
+  - curl -L -fsS -o ffmpeg\ffmpeg-latest.zip https://ffmpeg.zeranoe.com/builds/win64/static/ffmpeg-latest-win64-static.zip
+  - 7z x ffmpeg\ffmpeg-latest.zip -o"ffmpeg"
+  - copy C:\projects\boram\_build\ffmpeg\ffmpeg-latest-win64-static\bin\ffmpeg.exe C:\projects\boram\bin\win64\bin-video\
+  - copy C:\projects\boram\_build\ffmpeg\ffmpeg-latest-win64-static\bin\ffprobe.exe C:\projects\boram\bin\win64\bin-video\
+  
+  - echo Downloading latest libmpv 64-bit build...
+  - curl -L -fsS -o mpv\mpv-dev.7z https://mpv.srsfckn.biz/mpv-dev-latest.7z
+  - 7z x mpv\mpv-dev.7z -o"C:\mpv-dev"
+  - xcopy C:\mpv-dev\include\* C:\mingw\local64\include\ /s /e
+  - xcopy C:\mpv-dev\x86_64\* C:\mingw\local64\lib\ /s /e
   # - echo Downloading latest mpv.js x64 build...
   # - curl -L -fsS -o mpv.js-v0.2.2-x64.tar.gz https://github.com/Kagami/mpv.js/releases/download/v0.2.2/mpv.js-v0.2.2-node-v42-win32-x64.tar.gz
   # - 7z e mpv.js-v0.2.2-x64.tar.gz 
   # - 7z x mpv.js-v0.2.2-x64.tar -oC:\projects\boram
   # 
-  # - echo Downloading Latest youtube-dl executable...
-  # - cd "C:\projects\boram"
-  # - curl -L -fsS -o youtube-dl.exe https://yt-dl.org/latest/youtube-dl.exe
-  # 
+  - echo Downloading Latest youtube-dl executable...
+  - cd "C:\projects\boram\bin"
+  - curl -L -fsS -o youtube-dl.exe https://yt-dl.org/latest/youtube-dl.exe
+  
   # - echo Fix node-env on Windows...
   # - npm install -g win-node-env
   # 
-  # - echo Performing npm install...
-  # - cd "C:\projects\boram"
+  - echo Performing npm install...
+  - where node
+  - cd "C:\Program Files\nodejs\node_modules\npm"
+  - npm install -g node-gyp
+  - cd "C:\projects\boram"
 
 
   # - npm install --global --production windows-build-tools
   # - npm install -g node-gyp
+  # - npm install -g npm
+  # - npm install -g node-gyp
+  - setx GYP_MSVS_VERSION 2013 /M
   - set BORAM_PLATFORM=win64
-  - npm config set python C:\Python27
-  # - npm config set msvs_version 2013
+  - npm config set python C:\Python27-x64
+  - npm config set msvs_version 2013
   # - del binding.gyp
   - npm install
-
+  # - ps: |
+  #       ${BracketVar} = "<"
+  #       If (!(patch -Rsfp1 --dry-run ${BracketVar}mui-tabs.patch))
+  #       {
+  #         patch -N -r- -p1 ${BracketVar}mui-tabs.patch
+  #       }
+  #       If (!(patch -Rsfp1 --dry-run ${BracketVar}epackager-path.patch))
+  #       {
+  #         patch -N -r- -p1 ${BracketVar}epackager-path.patch
+  #       }
+  # 
 build_script:
   - set NODE_ENV=production
   - set BORAM_PLATFORM=win64
-  - yarn run webpack
+  - xcopy C:\mingw\local64\* bin\win64\ /s /e 
+  - del build\Release\boram.node
+  - node-gyp rebuild --arch=x64
+  # - ps: Remove-Item dist\app -Recurse -ErrorAction Ignore
+  - npx webpack
   - echo copying
+  - copy build\Release\boram.node dist\app\boram.dll
   - dir build\Release
-  - copy build\Release\mpvjs.node dist\app\boram.dll
-  - copy C:\mpv-dev\64\mpv-1.dll dist\app\mpv-1.dll
-  - copy C:\projects\boram\_build\youtube-dl.exe dist\app\
-  - yarn run pack-win64
+  - copy C:\mpv-dev\x86_64\mpv-1.dll dist\app\mpv-1.dll
+  - npx electron-packager dist\app --no-prune --platform=win32 --arch=x64 --out=dist --icon=src\index\icon.ico --win32metadata.CompanyName="T-ara Industries" --win32metadata.FileDescription="Cross-platform WebM converter" --win32metadata.OriginalFilename=boram.exe --win32metadata.ProductName=boram 
+  - cd dist
+  - cd *win-x64
+  - del "LICENSE*"
+  - cd ..
+  - copy ..\licenses *win-x64 
+  - 7z a -m0=lzma2 -mx=9 boram-win-x64.7z *win-x64
   
 test: off
+
+artifacts:
+  - path: dist\boram-win-x64.7z
+    name: Boram-Win-x64
