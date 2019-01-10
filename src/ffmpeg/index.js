@@ -284,7 +284,7 @@ export default makeRunner("ffmpeg", {
         args.push("-c:a", "libopus");
         args.push("-b:a", `${opts.ab}k`);
       } else if (opts.acodec === "aac") {
-        args.push("-c:a", "libfdk_aac");
+        args.push("-c:a", "aac");
         args.push("-b:a", `${opts.ab}k`);
       } else if (opts.acodec === "vorbis") {
         args.push("-c:a", "libvorbis");
