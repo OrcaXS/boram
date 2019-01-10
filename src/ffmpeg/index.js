@@ -283,6 +283,9 @@ export default makeRunner("ffmpeg", {
       if (opts.acodec === "opus") {
         args.push("-c:a", "libopus");
         args.push("-b:a", `${opts.ab}k`);
+      } else if (opts.acodec === "aac") {
+        args.push("-c:a", "libfdk_aac");
+        args.push("-b:a", `${opts.ab}k`);
       } else if (opts.acodec === "vorbis") {
         args.push("-c:a", "libvorbis");
         args.push("-q:a", opts.ab.toString());
@@ -315,7 +318,7 @@ export default makeRunner("ffmpeg", {
     }
 
     // Output format. Can be fixed by user.
-    args.push("-f", "webm");
+    args.push("-f", (opts.vcodec === "x264") ? "mp4" : "webm");
 
     return args.join(" ");
   },

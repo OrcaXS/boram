@@ -251,7 +251,8 @@ export default class extends React.PureComponent {
     const {preview, target} = this.state;
     const title = this.refs.title.getValue().trim();
     const baseArgs = parseArgs(this.props.rawArgs);
-    const outfmt = getOpt(baseArgs, "-f", "webm", {last: true});
+    const fileExt = (this.props.vcodec === "x264") ? "mp4" : "webm";
+    const outfmt = getOpt(baseArgs, "-f", fileExt, {last: true});
     const frameParser = this.createFrameParser();
     const startTime = this.now();
 

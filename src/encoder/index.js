@@ -208,7 +208,8 @@ export default class extends React.PureComponent {
   canCopyAudio(atrackn) {
     if (atrackn == null) return false;
     const t = this.getAudioTracks()[atrackn];
-    return t.codec_name === "vorbis" || t.codec_name === "opus";
+    const acodec_arr = ["aac", "vorbis", "opus"];
+    return acodec_arr.indexOf(t.codec_name) > -1;
   }
 
   makeFocuser = (name) => {
