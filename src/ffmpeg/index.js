@@ -160,8 +160,23 @@ export default makeRunner("ffmpeg", {
     }
 
     // Video.
-    args.push("-threads", os.cpus().length);
-    if (opts.vcodec === "vp9") {
+    const threads = os.cpus().length;
+    args.push("-threads", threads);
+    if (opts.vcodec === "av1") {
+      args.push("-c:v", "libaom-av1");
+      args.push("-cpu-used", opts.modeMT === "no-mt" ? "0" : "4");
+      if (opts.modeMT !== "no-mt") {
+        const maxCols = Math.floor(Math.log2((opts._finalw + 63) / 64));
+        const maxRows = Math.floor(Math.log2((opts._finalh + 63) / 64));
+        const tiles = Math.ceil(Math.log2(threads) / 2);
+        args.push("-tile-columns", Math.min(tiles, maxCols));
+        args.push("-tile-rows", Math.min(tiles, maxRows));
+      }
+      if (opts.modeMT === "row-mt") {
+        args.push("-row-mt", "1");
+      }
+      args.push("-strict", "experimental");
+    } else if (opts.vcodec === "vp9") {
       args.push("-c:v", "libvpx-vp9");
       args.push("-speed", opts.modeMT === "no-mt" ? "0" : "1");
       args.push("-tile-columns", opts.modeMT === "no-mt" ? "0" : "6");
@@ -180,11 +195,13 @@ export default makeRunner("ffmpeg", {
     args.push("-b:v", opts.vb ? `${opts.vb}k` : "0");
 
     if (opts.quality != null) {
-      if (opts.quality === 0) {
-        // Slightly different than "-crf 0".
+      args.push("-crf", opts.quality.toString());
+      if (opts.vcodec === "vp8" && opts.quality < 4) {
+        // Set to 4 by default.
+        args.push("-qmin", "0");
+      }
+      if (opts.vcodec === "vp9" && opts.quality === 0) {
         args.push("-lossless", "1");
-      } else {
-        args.push("-crf", opts.quality.toString());
       }
     }
 
@@ -297,6 +314,9 @@ export default makeRunner("ffmpeg", {
       }
     }
 
+    // Output format. Can be fixed by user.
+    args.push("-f", "webm");
+
     return args.join(" ");
   },
   _getCommonArgs(baseArgs = []) {
@@ -315,15 +335,18 @@ export default makeRunner("ffmpeg", {
     clearOpt(args, [
       "-b:v",
       "-speed",
+      "-cpu-used",
       "-row-mt",
       "-tile-columns",
       "-frame-parallel",
       "-auto-alt-ref",
       "-lag-in-frames",
+      "-strict",
       "-g",
     ]);
     args.push("-preset", "ultrafast");
-    args.push("-f", "matroska", this._escapeFilename(outpath));
+    fixOpt(args, "-f", "matroska", {add: true, last: true});
+    args.push(this._escapeFilename(outpath));
     return args;
   },
   getEncodeArgs({baseArgs, passlog, passn, title, outpath}) {
@@ -335,11 +358,9 @@ export default makeRunner("ffmpeg", {
       // We always have single output stream so caller should reserve
       // only path with suffix "-0.log".
       passlog = passlog.slice(0, -6);
-      // Passlog shouldn't be escaped as filename:
-      // "-passlogfile file:test" will create "file:test-0.log".
-      // Seems to be ffmpeg's inconsistency.
       args.push("-an", "-pass", "1", "-passlogfile", passlog);
-      args.push("-f", "null", "-");
+      fixOpt(args, "-f", "null", {add: true, last: true});
+      args.push("-");
     } else if (passn === 2) {
       passlog = passlog.slice(0, -6);
       args.push("-pass", "2", "-passlogfile", passlog);
@@ -353,7 +374,8 @@ export default makeRunner("ffmpeg", {
     }
     return args;
   },
-  getPreviewArgs({inpath, time, vcodec, width, height, sar, strfps, outpath}) {
+  getPreviewArgs({inpath, time, vcodec, width, height, sar, strfps,
+                  outfmt, outpath}) {
     width = sar > 1 ? Math.round(width * sar) : width;
     height = sar < 1 ? Math.round(height / sar) : height;
     const color = [
@@ -396,7 +418,8 @@ export default makeRunner("ffmpeg", {
       "-an", "-sn", "-dn",
       "-frames:v", "1",
       "-pix_fmt", "yuv420p",
-      this._escapeFilename(outpath)
+      "-strict", "experimental",
+      "-f", outfmt, this._escapeFilename(outpath)
     );
     return args;
   },
@@ -406,14 +429,15 @@ export default makeRunner("ffmpeg", {
       this._escapeConcatArg(inpath),
     ].join("\n"));
   },
-  getConcatArgs({inpath, listpath, fps, outpath}) {
+  getConcatArgs({inpath, listpath, fps, outfmt, outpath}) {
     const args = this._getCommonArgs();
     args.push(
       "-f", "concat", "-safe", "0", "-i", this._escapeFilename(listpath),
       "-itsoffset", ceilFixed(1 / fps, 3), "-i", this._escapeFilename(inpath),
       "-map", "0:v:0", "-map", "1:a:0?",
       "-c", "copy",
-      this._escapeFilename(outpath)
+      "-strict", "experimental",
+      "-f", outfmt, this._escapeFilename(outpath)
     );
     return args;
   },

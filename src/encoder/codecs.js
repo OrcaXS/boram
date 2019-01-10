@@ -30,7 +30,7 @@ const HELP = {
   ], quality: [
     "Video quality",
     `Generally useful for CRF mode and short clips.
-     0÷63 for VP9 ("0" is lossless), 4÷63 for VP8.
+     0÷63 ("0" is lossless, VP9 only).
      "25" is good value and thus default in CRF mode.`,
   ], ab: [
     "Audio bitrate/quality",
@@ -106,6 +106,7 @@ export default class extends React.PureComponent {
               value={this.props.vcodec}
               onChange={this.props.makeSelecter("vcodec")}
             >
+              <MenuItem value="av1" primaryText="av1" />
               <MenuItem value="vp9" primaryText="vp9" />
               <MenuItem value="vp8" primaryText="vp8" />
               <MenuItem value="x264" primaryText="x264" />
@@ -179,7 +180,8 @@ export default class extends React.PureComponent {
               onCheck={this.props.makeChecker("modeCRF")}
             />
             <Sep margin={7} />
-            <ShowHide show={this.props.vcodec === "vp9"}>
+            <ShowHide show={this.props.vcodec === "vp9" ||
+                            this.props.vcodec === "av1"}>
               <SmallSelect
                 width={85}
                 title="Multi-threading mode"

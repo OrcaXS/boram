@@ -37,7 +37,7 @@ export default class extends React.PureComponent {
     // Higher resolution/FPS is always better.
     if (a.height !== b.height) return b.height - a.height;
     if (a.width !== b.width) return b.width - a.width;
-    if (a.fps !== b.fps) return b.fps - a.fps;
+    if (a.fps !== b.fps) return (b.fps || 0) - (a.fps || 0);
     // Prefer HDR.
     if (a.vcodec === "vp9.2") return -1;
     if (b.vcodec === "vp9.2") return 1;
@@ -52,14 +52,12 @@ export default class extends React.PureComponent {
         }
       }
     }
-    // Else prefer by bitrate.
-    if (a.tbr !== b.tbr) return b.tbr - a.tbr;
+    // Else prefer by size.
+    if (a.filesize !== b.filesize) return b.filesize - a.filesize;
     return 0;
   }
-  getVCodecName({vcodec, ext}) {
-    return vcodec === "vp9.2"
-      ? "vp9 hdr"
-      : (vcodec || ext).replace(/\..+$/, "");
+  getVCodecName({vcodec}) {
+    return vcodec === "vp9.2" ? "vp9 hdr" : vcodec.replace(/\..+$/, "");
   }
   getACodecName({acodec}) {
     return (acodec && acodec !== "none")
@@ -76,7 +74,7 @@ export default class extends React.PureComponent {
   }
   getVideoFormats() {
     const formats = this.props.info.formats
-      .filter(f => !f.acodec || f.vcodec !== "none")
+      .filter(f => f.vcodec && f.vcodec !== "none")
       .sort(this.compareVideoFormats)
       .map(f => ({
         key: f.format_id,
@@ -100,7 +98,7 @@ export default class extends React.PureComponent {
   }
   getAudioFormats() {
     return this.props.info.formats
-      .filter(f => f.vcodec === "none")
+      .filter(f => f.acodec && f.vcodec === "none")
       .sort(this.compareAudioFormats)
       .map(f => ({
         key: f.format_id,

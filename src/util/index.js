@@ -154,35 +154,55 @@ export function quoteArgs(args) {
   }).join(" ");
 }
 
-export function getOpt(arr, key, def) {
-  let prev = false;
-  const res = arr.find(v => {
-    if (prev) {
-      return true;
-    } else if (v === key) {
-      prev = true;
+export function getOpt(arr, key, def, opts = {}) {
+  if (opts.last) {
+    for (let i = arr.length; i >= 0; i--) {
+      if (arr[i] === key) {
+        if (i < arr.length - 1) {
+          return arr[i + 1];
+        }
+        break;
+      }
     }
-  });
-  return res == null ? def : res;
+  } else {
+    let prev = false;
+    for (const v of arr) {
+      if (prev) return v;
+      if (v === key) {
+        prev = true;
+      }
+    }
+  }
+  return def;
 }
 
 export function fixOpt(arr, key, newval, opts = {}) {
+  const getval = (v) => typeof newval === "function" ? newval(v) : newval;
   let found = false;
-  let prev = false;
-  arr.forEach((v, i) => {
-    if (prev) {
-      arr[i] = typeof newval === "function" ? newval(v) : newval;
-      prev = false;
-      found = true;
-    } else if (v === key) {
-      prev = true;
+  if (opts.last) {
+    for (let i = arr.length; i >= 0; i--) {
+      if (arr[i] === key) {
+        if (i < arr.length - 1) {
+          arr[i + 1] = getval(arr[i + 1]);
+          found = true;
+        }
+        break;
+      }
     }
-  });
-  if (!found) {
-    if (opts.add) {
-      const v = typeof newval === "function" ? newval(null) : newval;
-      arr.push(key, v);
-    }
+  } else {
+    let prev = false;
+    arr.forEach((v, i) => {
+      if (prev) {
+        arr[i] = getval(v);
+        prev = false;
+        found = true;
+      } else if (v === key) {
+        prev = true;
+      }
+    });
+  }
+  if (!found && opts.add) {
+    arr.push(key, getval(null));
   }
 }
 

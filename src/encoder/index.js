@@ -20,13 +20,13 @@ import {parseTime, showTime, parseAR, round2} from "../util";
 const DEFAULT_LIMIT = 19;
 const DEFAULT_BITRATE = 5000;
 const DEFAULT_Q = 25;
+
 const DEFAULT_X264_Q = 23;
-const MIN_VP8_Q = 4;
-const MAX_VP8_Q = 63;
-const MIN_VP9_Q = 0;
-const MAX_VP9_Q = 63;
 const MIN_X264_Q = 0;
 const MAX_X264_Q = 51;
+
+const MIN_Q = 0;
+const MAX_Q = 63;
 const DEFAULT_AUDIO_CODEC = "opus";
 const DEFAULT_OPUS_BITRATE = 128;
 const DEFAULT_VORBIS_Q = 4;
@@ -504,14 +504,10 @@ export default class extends React.PureComponent {
         return null;
       }
       v = requireInt(v);
-      if (vcodec === "vp9") {
-        return requireRange(v, MIN_VP9_Q, MAX_VP9_Q);
-      } else if (vcodec === "vp8") {
-        return requireRange(v, MIN_VP8_Q, MAX_VP8_Q);
-      } else if (vcodec === "x264") {
+      if (vcodec === "x264") {
         return requireRange(v, MIN_X264_Q, MAX_X264_Q);
       } else {
-        assert(false);
+        return requireRange(v, MIN_Q, MAX_Q);
       }
     });
     if (what.selected === "acodec") {
