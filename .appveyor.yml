@@ -112,7 +112,7 @@ build_script:
   - copy build\Release\boram.node dist\app\boram.dll
   - dir build\Release
   - copy C:\mpv-dev\x86_64\mpv-1.dll dist\app\mpv-1.dll
-  - npx electron-packager dist\app --no-prune --platform=win32 --arch=x64 --out=dist --icon=src\index\icon.ico --win32metadata.CompanyName="T-ara Industries" --win32metadata.FileDescription="Cross-platform WebM converter" --win32metadata.OriginalFilename=boram.exe --win32metadata.ProductName=boram 
+  - npx electron-packager dist\app --no-prune --platform=win32 --arch=x64 --out=dist --icon=src\index\icon.ico --win32metadata.CompanyName="🎹🐱" --win32metadata.FileDescription="Cross-platform multi-format video converter" --win32metadata.OriginalFilename=boram.exe --win32metadata.ProductName=boram 
   - cd dist
   - cd *win-x64
   - del "LICENSE*"
