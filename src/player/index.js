@@ -563,11 +563,10 @@ class CropArea extends React.PureComponent {
       }
     } else if (this.movInner) {
       let {startW: width, startH: height, startX: left, startY: top} = this;
-      console.log({ width, height, left, top, startPos: this.startPos, dx, dy });
       switch (this.startPos) {
       case "nw":
-        if (!(left === 0 && dx < 0)) left += dx;
-        if (!(left === 0 && dx < 0)) width -= dx;
+        left += dx;
+        width -= dx;
         top += dy;
         height -= dy;
         break;
@@ -581,8 +580,8 @@ class CropArea extends React.PureComponent {
         height -= dy;
         break;
       case "sw":
-        if (!(left === 0 && dx < 0)) left += dx;
-        if (!(left === 0 && dx < 0)) width -= dx;
+        left += dx;
+        width -= dx;
         height += dy;
         break;
       case "n":
@@ -596,8 +595,8 @@ class CropArea extends React.PureComponent {
         width += dx;
         break;
       case "w":
-        if (!(left === 0 && dx < 0)) left += dx;
-        if (!(left === 0 && dx < 0)) width -= dx;
+        left += dx;
+        width -= dx;
         break;
       case "i":
         left += dx;
