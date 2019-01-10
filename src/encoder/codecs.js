@@ -142,8 +142,13 @@ export default class extends React.PureComponent {
               disabled={!this.props.hasAudio}
               onChange={this.props.makeSelecter("acodec")}
             >
-              <MenuItem primaryText="opus" value="opus" />
-              <MenuItem primaryText="vorbis" value="vorbis" />
+            {this.props.vcodec !== "x264" ? (
+              <React.Fragment>
+                <MenuItem primaryText="opus" value="opus" />
+                <MenuItem primaryText="vorbis" value="vorbis" />
+              </React.Fragment>
+            ) : null}
+              <MenuItem primaryText="aac" value="aac" />
             {this.props.copyableAudio ?
               <MenuItem primaryText="copy" value="copy" />
             : null}

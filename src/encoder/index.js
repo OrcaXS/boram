@@ -21,13 +21,17 @@ const DEFAULT_LIMIT = 19;
 const DEFAULT_BITRATE = 5000;
 const DEFAULT_Q = 25;
 
+const DEFAULT_VIDEO_CODEC = "x264";
 const DEFAULT_X264_Q = 23;
 const MIN_X264_Q = 0;
 const MAX_X264_Q = 51;
+const MIN_AAC_BITRATE = 128;
+const MAX_AAC_BITRATE = 768;
+const DEFAULT_AAC_BITRATE = 128;
 
 const MIN_Q = 0;
 const MAX_Q = 63;
-const DEFAULT_AUDIO_CODEC = "opus";
+const DEFAULT_AUDIO_CODEC = "aac";
 const DEFAULT_OPUS_BITRATE = 128;
 const DEFAULT_VORBIS_Q = 4;
 const MIN_OPUS_BITRATE = 6;
@@ -103,7 +107,7 @@ export default class extends React.PureComponent {
     extSubPath: null,
     hasAudio: !!this.getAudioTracks().length,
     atrackn: this.getAudioTracks().length ? 0 : null,
-    vcodec: "vp9",
+    vcodec: DEFAULT_VIDEO_CODEC,
     acodec: DEFAULT_AUDIO_CODEC,
     mode2Pass: false,
     modeLimit: false,
@@ -523,6 +527,10 @@ export default class extends React.PureComponent {
         v = v || DEFAULT_VORBIS_Q;
         v = requireInt(v);
         return requireRange(v, MIN_VORBIS_Q, MAX_VORBIS_Q);
+      } else if (acodec === "aac") {
+        v = v || DEFAULT_AAC_BITRATE;
+        v = requireInt(v);
+        return requireRange(v, MIN_AAC_BITRATE, MAX_AAC_BITRATE);
       } else if (acodec === "copy") {
         return null;
       } else {
