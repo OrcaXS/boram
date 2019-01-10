@@ -7,7 +7,6 @@ environment:
 cache:
   - node_modules
   - '%USERPROFILE%\.electron'
-  - 'C:\nacl_sdk'
   - '_build\nacl_sdk'
 
 init:
@@ -18,35 +17,29 @@ install:
   - ps: Install-Product node 8 x64
   - mkdir "_build\mpv"
   - mkdir "_build\ffmpeg"
-  - ps: | 
-          $path = "_build\nacl_sdk"
-          If(!(test-path $path))
-          {
-              New-Item -ItemType Directory -Force -Path $path
-          }
+  # - ps: | 
+  #         $nacl_build_path = "_build\nacl_sdk"
+  #         If(!(test-path $nacl_build_path))
+  #         {
+  #             New-Item -ItemType Directory -Force -Path $nacl_build_path
+  #         }
   
   - mkdir "bin\win64\bin-video"
   
-  - cd "_build"
-  - echo Installing NaCl_SDK...
-  - ps: |
-          If(!(test-path "C:\nacl_sdk"))
-          {
-                curl -L -fsS -o nacl_sdk.zip https://github.com/Kagami/nacl_sdk/archive/master.zip
-                7z x nacl_sdk.zip -o"C:\"
-                cd C:\
-                ren nacl_sdk-master nacl_sdk
-                cd C:\nacl_sdk
-                ./naclsdk update
-                (Get-Content pepper_49\tools\host_vc.mk).Replace("32_host","64_host") | Set-Content pepper_49\tools\host_vc.mk
-                call "C:\Program Files\Microsoft SDKs\Windows\v7.1\Bin\SetEnv.cmd" /x64
-                call "C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\vcvarsall.bat" amd64
-                set NACL_SDK_ROOT=c:\nacl_sdk\pepper_49
-                cd pepper_49\src
-                make TOOLCHAIN=win
-          }
-
-
+  - echo Setting env...
+  - call "C:\Program Files\Microsoft SDKs\Windows\v7.1\Bin\SetEnv.cmd" /x64
+  - call "C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\vcvarsall.bat" amd64
+  
+  - echo Installing NaCl_SDK...  
+  - cd C:\
+  - git clone "https://github.com/Kagami/nacl_sdk"
+  - cd C:\nacl_sdk
+  - naclsdk.bat update -v
+  - powershell -command "(Get-Content pepper_49\tools\host_vc.mk).Replace('32_host','64_host') | Set-Content pepper_49\tools\host_vc.mk"
+  - cd pepper_49\src
+  - make TOOLCHAIN=win PROJECTS="ppapi ppapi_cpp ppapi_gles2"
+  
+  # - set NACL_SDK_ROOT=c:\nacl_sdk\pepper_49
   - echo Preparing binaries...
   - echo Downloading Latest ffmpeg executable...
   - cd "C:\projects\boram\_build"
@@ -78,7 +71,6 @@ install:
   - npm install -g node-gyp
   - cd "C:\projects\boram"
 
-
   # - npm install --global --production windows-build-tools
   # - npm install -g node-gyp
   # - npm install -g npm
@@ -89,17 +81,7 @@ install:
   - npm config set msvs_version 2013
   # - del binding.gyp
   - npm install
-  # - ps: |
-  #       ${BracketVar} = "<"
-  #       If (!(patch -Rsfp1 --dry-run ${BracketVar}mui-tabs.patch))
-  #       {
-  #         patch -N -r- -p1 ${BracketVar}mui-tabs.patch
-  #       }
-  #       If (!(patch -Rsfp1 --dry-run ${BracketVar}epackager-path.patch))
-  #       {
-  #         patch -N -r- -p1 ${BracketVar}epackager-path.patch
-  #       }
-  # 
+ 
 build_script:
   - set NODE_ENV=production
   - set BORAM_PLATFORM=win64
