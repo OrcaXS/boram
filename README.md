@@ -1,7 +1,6 @@
 # boram ![](src/index/icon-big.png)
 
-![](https://raw.githubusercontent.com/Kagami/boram/assets/boram-source.png)
-![](https://raw.githubusercontent.com/Kagami/boram/assets/boram-encode.png)
+This is a fork of the original [latest release](https://github.com/Kagami/boram), with the ability to encode videos with x264 and AAC.
 
 ## Features
 
