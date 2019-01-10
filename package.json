@@ -4,7 +4,7 @@
   "private": true,
   "description": "Cross-platform WebM converter",
   "scripts": {
-    "postinstall": "cp build/Release/ffmpeg58.node node_modules/electron/dist/libffmpeg.so || true",
+    "_postinstall": "cp build/Release/ffmpeg58.node node_modules/electron/dist/libffmpeg.so || true",
     "start": "webpack --watch",
     "dev": "electron dist/app",
     "test": "eslint .",
