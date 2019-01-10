@@ -30,11 +30,11 @@ const HELP = {
   ], quality: [
     "Video quality",
     `Generally useful for CRF mode and short clips.
-     0÷63 ("0" is lossless, VP9 only).
-     "25" is good value and thus default in CRF mode.`,
+     0÷63 ("0" is lossless, VP9/x264 only).
+     '23' and '25' are default for x264 and VP9, respectively.`,
   ], ab: [
     "Audio bitrate/quality",
-    `Specifies bitrate in kbits for Opus codec or quality for Vorbis.
+    `Specifies bitrate in kbits for Opus/AAC codec or quality for Vorbis.
      Ranges and defaults are 6÷510/-1÷10, 128/4 respectfully`,
   ],
 };
