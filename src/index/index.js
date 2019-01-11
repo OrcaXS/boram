@@ -100,7 +100,7 @@ app.on("ready", () => {
     // Works strangely on Linux. useContentSize=false enlarges window to
     // include borders and useContentSize=true enlarges even more.
     useContentSize: BORAM_WIN_BUILD || BORAM_MAC_BUILD,
-    title: `${name} v${version}-mod for 🎹🐱`,
+    title: `${name} v${version} for 🎹🐱`,
     icon: BORAM_WIN_BUILD ? WIN_ICON_PATH : ICON_BIG_PATH,
     webPreferences: {
       plugins: true,
