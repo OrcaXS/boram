@@ -1,0 +1,54 @@
+osx_instance:
+  image: mojave-base
+
+# check_task:
+#   node_modules_cache:
+#     folder: node_modules
+#     fingerprint_script: cat package-lock.json
+
+env: 
+  BORAM_MAC_PREBUILT_ROOT: $CIRRUS_WORKING_DIR/build/Release
+  BORAM_PLATFORM: mac64
+  NACL_SDK_ROOT: $HOME/nacl_sdk/pepper_49
+  GITHUB_TOKEN: ENCRYPTED[1962cc5923b1f7cac25d5c0e6c99a9ae775c55743a2673d5d5b94e58581c80de1f844f75d9da92b076ff9a48e27391f2]
+  CIRRUS_RELEASE_ID: $CIRRUS_TAG
+
+publish_task:
+  setup_script:
+    - brew update
+    - brew install node
+    - brew install libass -s
+    - brew install libvpx --HEAD
+    - brew install aom
+    - brew install dav1d
+    - brew install ffmpeg --HEAD --with-libass --with-aom --with-dav1d
+    - brew install mpv -s --with-lgpl
+    - brew install python@2
+    - brew install p7zip
+    - cd $HOME
+    - git clone https://github.com/Kagami/nacl_sdk
+    - cd nacl_sdk
+    - ./naclsdk update
+    - cd $CIRRUS_WORKING_DIR
+    - bash scripts/make-mac64-deps.sh
+    - mkdir bin
+    - wget https://yt-dl.org/latest/youtube-dl -O bin/youtube-dl.zip
+    - npm i -g npx
+    - npm install
+    - npm run mpv-mac64-prebuild
+    - cp -a build/Release bin/mac64
+    - npm run app
+    - npm run mpv-mac64
+    - cp scripts/dist/* dist/app/
+    - chmod +x dist/app/{*.dylib,ffmpeg,ffprobe}
+    
+  node_modules_cache:
+    folder: node_modules
+    fingerprint_script: cat package-lock.json
+    
+  publish_script: npx electron-packager dist/app --no-prune --platform=darwin --arch=x64 --out=dist --icon=src/index/icon.icns --app-copyright='Fishing is good' --app-category-type=public.app-category.video && cd dist/*darwin-x64 && mv boram.app boram-v${npm_package_version}-mod.app && 7z a -tzip -mx=9 $(echo ../*darwin-x64-mod).7z *.app
+  
+  release_script: bash $CIRRUS_WORKING_DIR/.cirrus_release.sh
+
+
+  
