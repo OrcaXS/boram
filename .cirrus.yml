@@ -11,7 +11,7 @@ env:
   BORAM_PLATFORM: mac64
   NACL_SDK_ROOT: $HOME/nacl_sdk/pepper_49
   GITHUB_TOKEN: ENCRYPTED[1962cc5923b1f7cac25d5c0e6c99a9ae775c55743a2673d5d5b94e58581c80de1f844f75d9da92b076ff9a48e27391f2]
-  CIRRUS_RELEASE_ID: $CIRRUS_TAG
+  CIRRUS_RELEASE: $CIRRUS_TAG
 
 publish_task:
   setup_script:
@@ -46,9 +46,9 @@ publish_task:
     folder: node_modules
     fingerprint_script: cat package-lock.json
     
-  publish_script: npx electron-packager dist/app --no-prune --platform=darwin --arch=x64 --out=dist --icon=src/index/icon.icns --app-copyright='Fishing is good' --app-category-type=public.app-category.video && cd dist/*darwin-x64 && mv boram.app boram-v${npm_package_version}-mod.app && 7z a -tzip -mx=9 $(echo ../*darwin-x64-mod).7z *.app
+  publish_script: npx electron-packager dist/app --no-prune --platform=darwin --arch=x64 --out=dist --icon=src/index/icon.icns --app-copyright='Fishing is good' --app-category-type=public.app-category.video && cd dist/*darwin-x64 && mv boram.app boram-v${npm_package_version}-mod.app && 7z a -tzip -mx=9 $(echo ../*darwin-x64).7z *.app
   
-  release_script: bash $CIRRUS_WORKING_DIR/.cirrus_release.sh
+  release_script: bash $CIRRUS_WORKING_DIR/.cirrus_release.sh github_api_token=$GITHUB_TOKEN owner=$CIRRUS_REPO_OWNER repo=$CIRRUS_REPO_NAME tag=$CIRRUS_TAG folder_path=./dist/
 
 
   

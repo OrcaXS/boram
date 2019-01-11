@@ -109,12 +109,12 @@ artifacts:
     name: Boram-Win-x64
     
 deploy:
-  release: Boram-$(APPVEYOR_REPO_TAG_NAME)
+  release: $(APPVEYOR_REPO_TAG_NAME)
   provider: GitHub
   auth_token:
     secure: G1kht/CnnE28vGbeScM8JyuZYTJJl1IOK2jOOQHxSugkna7E0sUtU8NEr/w/GGvt
   artifact: /.*\.7z/
-  draft: true
+  draft: false
   prerelease: true
   on:
     branch: for_sicp
