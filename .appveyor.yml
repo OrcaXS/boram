@@ -100,10 +100,22 @@ build_script:
   - del "LICENSE*"
   - cd ..
   - copy ..\licenses *win-x64 
-  - 7z a -m0=lzma2 -mx=9 boram-win-x64.7z *win-x64
+  - 7z a -m0=lzma2 -mx=9 boram-%APPVEYOR_REPO_TAG_NAME%-win-x64.7z *win-x64
   
 test: off
 
 artifacts:
-  - path: dist\boram-win-x64.7z
+  - path: 'dist\*.7z'
     name: Boram-Win-x64
+    
+deploy:
+  release: Boram-$(APPVEYOR_REPO_TAG_NAME)
+  provider: GitHub
+  auth_token:
+    secure: G1kht/CnnE28vGbeScM8JyuZYTJJl1IOK2jOOQHxSugkna7E0sUtU8NEr/w/GGvt
+  artifact: /.*\.7z/
+  draft: true
+  prerelease: true
+  on:
+    branch: for_sicp
+    APPVEYOR_REPO_TAG: true        # deploy on tag push only
